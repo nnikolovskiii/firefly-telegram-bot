@@ -1,0 +1,23 @@
+[project]
+name = "firefly-telegram-bot"
+version = "0.1.0"
+description = "Telegram bot to scan receipts and manage expenses for Firefly III"
+authors = [
+    {name = "Nikola Nikolovski", email = "nikolovski.nikola42@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "python-telegram-bot[job-queue]>=21.0",
+    "openai>=1.10.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "pydantic>=2.5.0"
+]
+
+[tool.poetry]
+packages = [{include = "firefly_telegram_bot", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
