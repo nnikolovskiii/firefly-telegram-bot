@@ -13,18 +13,17 @@ client = AsyncOpenAI(
 class ExpenseItem(BaseModel):
     description: str
     amount: float
-    currency: str = "USD"
+    # AI will try to find it, otherwise it's None
+    currency: str | None = None 
 
 class ReceiptData(BaseModel):
     store_name: str
     date: str
     items: List[ExpenseItem]
-    total_amount: float
+    # We also check if the whole receipt has a main currency
+    currency: str | None = None 
 
 async def process_receipt_image(image_bytes: bytes) -> ReceiptData:
-    """
-    Sends image bytes to OpenRouter (Gemini/GPT) to extract receipt information.
-    """
     base64_image = base64.b64encode(image_bytes).decode('utf-8')
 
     response = await client.beta.chat.completions.parse(
@@ -32,23 +31,26 @@ async def process_receipt_image(image_bytes: bytes) -> ReceiptData:
         messages=[
             {
                 "role": "system", 
-                "content": "You are a helpful accountant assistant. Extract data from this receipt. Return strict JSON."
+                # CRITICAL: Instruction to convert symbols to ISO codes
+                "content": (
+                    "You are an accountant. Extract data from this receipt. "
+                    "Return strict JSON. "
+                    "If a currency symbol is visible (like 'den', 'MKD', '€', '$'), "
+                    "convert it to the 3-letter ISO code (e.g., MKD, EUR, USD). "
+                    "If no currency is visible, leave it null."
+                )
             },
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Analyze this receipt image and return the JSON data."},
+                    {"type": "text", "text": "Analyze this receipt image."},
                     {
                         "type": "image_url",
-                        "image_url": {
-                            # OpenRouter handles this format for Gemini automatically
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        },
+                        "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
                     },
                 ],
             }
         ],
         response_format=ReceiptData,
     )
-
     return response.choices[0].message.parsed
