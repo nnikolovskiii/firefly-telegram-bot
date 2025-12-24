@@ -9,6 +9,7 @@ from .config import (
 
 logger = logging.getLogger(__name__)
 
+
 def submit_transaction(transactions: List[Dict[str, Any]]):
     
     if not FIREFLY_URL or not FIREFLY_TOKEN:
@@ -53,7 +54,7 @@ def submit_transaction(transactions: List[Dict[str, Any]]):
 
         item = {
             "type": "withdrawal",
-            "date": tx.get("date", current_date),
+            "date": current_date,
             "amount": f"{amount:.2f}",
             # Append original price to description for reference
             "description": tx["description"] + original_desc,
