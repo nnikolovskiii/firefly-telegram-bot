@@ -54,7 +54,7 @@ def submit_transaction(transactions: List[Dict[str, Any]]):
         item = {
             "type": "withdrawal",
             # Use receipt date if AI found it, otherwise use today
-            "date": tx.get("date", current_date), 
+            "date": current_date, 
             "amount": f"{amount:.2f}",
             "description": tx["description"] + original_desc,
             "source_id": FIREFLY_SOURCE_ID,
